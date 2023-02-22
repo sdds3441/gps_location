@@ -3,7 +3,9 @@ package com.example.gps_location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import com.example.gps_location.data.mdc_Library
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -14,6 +16,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.gps_location.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Marker
+import org.json.JSONArray
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -42,7 +46,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         loadLibraries()
 
-        // Add a marker in Sydney and move the camera
+
 
     }
     private fun loadLibraries() {
@@ -103,11 +107,30 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         result?.let {
             val latlngbounds = LatLngBounds.Builder()
-            for(mdc_library in it.tbEntranceItem.row) {
+
+            val jsonString=assets.open("clinic.json").reader().readText()
+            val jsonArray=JSONArray(jsonString)
+
+           /* for(mdc_library in it.tbEntranceItem.row) {
 
                 val position =
                     LatLng(mdc_library.LATITUDE.toDouble(), mdc_library.LONGITUDE.toDouble())
                 val marker = MarkerOptions().position(position).title(mdc_library.SISUL_NM)
+                mMap.addMarker(marker)
+
+                latlngbounds.include(position)
+            }*/
+
+            for(index in 0..7) {
+
+
+                val jsonObject = jsonArray.getJSONObject(index)
+                val Latitude = jsonObject.getDouble("Latitude")
+                val Longitude = jsonObject.getDouble("Longitude")
+                val title=jsonObject.getString("Name")
+                val position =
+                    LatLng(Latitude.toDouble(), Longitude.toDouble())
+                val marker = MarkerOptions().position(position).title(title)
                 mMap.addMarker(marker)
 
                 latlngbounds.include(position)
@@ -119,4 +142,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+
 }
+
