@@ -10,7 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
@@ -23,7 +26,9 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.example.gps_location.databinding.ActivityMapsBinding
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.model.*
+
 import org.json.JSONArray
 import retrofit2.Call
 import retrofit2.Callback
@@ -36,8 +41,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION)
     val PERM_FLAG=99
 
+
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,13 +52,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         if (isPermitted()){
             startProcess()
         }else{
             ActivityCompat.requestPermissions(this,permissions,PERM_FLAG)
         }
-    }
+
+     }
 
     fun isPermitted():Boolean{
 
@@ -72,48 +81,40 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
+        val card_view=binding.cardView
 
         fusedLocationClient= LocationServices.getFusedLocationProviderClient(this)
         //loadLibraries()
         showLibraries()
         setUpdateLocationListener()
 
+        googleMap!!.setOnMarkerClickListener(object:GoogleMap.OnMarkerClickListener {
+            override fun onMarkerClick(p0: Marker): Boolean {
+                card_view.visibility=View.VISIBLE
+                var parkname = findViewById<TextView>(R.id.park_name)
+                var parkadd1 = findViewById<TextView>(R.id.park_add_lot)
+                var parkphone = findViewById<TextView>(R.id.phone_num)
+                var parkequip = findViewById<TextView>(R.id.equip)
+
+                return false
+            }
+        })
+
+        googleMap!!.setOnMapClickListener(object:GoogleMap.OnMapClickListener{
+            override fun onMapClick(p0: LatLng) {
+                card_view.visibility=View.GONE
+            }
+        })
 
     }
 
-    lateinit var fusedLocationClient: FusedLocationProviderClient
+private fun GoogleMap.setOnMapClickListener(onMarkerClickListener: OnMarkerClickListener) {
+
+}
+
+lateinit var fusedLocationClient: FusedLocationProviderClient
     lateinit var locationCallback: LocationCallback
-    /*private fun loadLibraries() {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(SeoulmdcApi.DOMAIN)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
 
-        val service = retrofit.create(SeoulmdcService::class.java)
-        service.getLibraries(SeoulmdcApi.API_KEY, 698,701)
-            .enqueue(object : Callback<mdc_Library> {
-
-                override fun onResponse(call: Call<mdc_Library>,
-                    response: Response<mdc_Library>
-                ) {
-
-
-
-                    Toast.makeText(this@MapsActivity, "안넘어감?", Toast.LENGTH_SHORT)
-                    showLibraries()
-
-                }
-
-                override fun onFailure(call: Call<mdc_Library>, t: Throwable) {
-                    //Log.e("라이브러리", "error=${t.localizedMessage}")
-                    Toast.makeText(this@MapsActivity, "데이터를 가져올 수 없습니다", Toast.LENGTH_SHORT)
-                        .show()
-                }
-
-            })
-
-    }*/
 
 
     private fun showLibraries() {
@@ -139,10 +140,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             val bounds = latlngbounds.build()
             val padding = 0
-            //val camera = CameraUpdateFactory.newLatLngBounds(bounds, padding)
-
-       // val camera=CameraUpdateFactory.newCameraPosition(cameraOption)
-            //mMap.moveCamera(camera)
 
     }
 
@@ -228,5 +225,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         return BitmapDescriptorFactory.fromBitmap(scaledBitmap)
 
     }
+
+
+
+
+
 }
 
