@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="images">
+        <item>@drawable/gangdong</item>
+        <item>@drawable/seongbuk</item>
+        <item>@drawable/yangcheon</item>
+        <item>@drawable/yeongdeungpo</item>
+        <item>@drawable/jongro</item>
+        <item>@drawable/jung</item>
+        <item>@drawable/eunpyeong</item>
+        <item>@drawable/yongsan</item>
+    </array>
+</resources>

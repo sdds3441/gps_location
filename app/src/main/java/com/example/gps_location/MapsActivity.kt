@@ -1,7 +1,11 @@
 package com.example.gps_location
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.content.res.TypedArray
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
@@ -10,17 +14,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.Menu
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.SearchView
-import android.widget.TextView
-import android.widget.Toast
-import androidx.cardview.widget.CardView
+import android.view.inputmethod.InputMethodManager
+import android.widget.*
+import android.widget.AdapterView.OnItemClickListener
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.gps_location.data.mdc_Library
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -28,16 +27,11 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.example.gps_location.databinding.ActivityMapsBinding
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.model.*
 
+
 import org.json.JSONArray
-import org.w3c.dom.NameList
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -91,20 +85,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        /*val addlist= mutableListOf<String>()
-        val numlist=mutableListOf<String>()
-        val namelist=mutableListOf<String>()
-        val timelist=mutableListOf<String>()*/
+        var imm:InputMethodManager?=null
+        imm=getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+
         val card_view = binding.cardView
         card_view.visibility = View.GONE
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        //loadLibraries()
         showLibraries(googleMap)
-        setUpdateLocationListener()
+        //setUpdateLocationListener()
 
         googleMap!!.setOnMapClickListener(object : GoogleMap.OnMapClickListener {
             override fun onMapClick(p0: LatLng) {
                 card_view.visibility = View.GONE
+
+                softkeyboardHide()
+
             }
         })
 
@@ -127,9 +122,43 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 centeradd.text = arr[0]
                 centerphone.text = arr[1]
                 centeropen.text = arr[2]
+                var index= arr[3].toInt()
+                var drawableTypedArray=resources.obtainTypedArray(R.array.images)
+
+                binding.imageView.setImageResource(drawableTypedArray.getResourceId(index,-1))
                 return false
             }
         })
+
+
+        val loc_btn=findViewById<ImageButton>(R.id.my_loc)
+
+        val bar=findViewById<ImageView>(R.id.search_bar)
+
+
+        bar.setOnClickListener{
+            val intent = Intent(this, SearchActivity::class.java)
+            startActivity(intent)
+            }
+
+        loc_btn.setOnClickListener{
+            setUpdateLocationListener()
+        }
+
+        val S_Lng=intent.getDoubleExtra("Searched_Lng", 0.0)
+        val S_Lat=intent.getDoubleExtra("Searched_Lat", 0.0)
+
+        if (S_Lng!=0.0) {
+
+            val S_LatLng=LatLng(S_Lat,S_Lng)
+            val cameraOption = CameraPosition.Builder()
+                .target(S_LatLng)
+                .zoom(13.0f)
+                .build()
+            val camera = CameraUpdateFactory.newCameraPosition(cameraOption)
+            mMap.moveCamera(camera)
+        }
+
     }
 
     private fun showLibraries(googleMap: GoogleMap) {
@@ -153,55 +182,60 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val number = jsonObject.getString("phoneNumber")
             val time = jsonObject.getString("Opentime")
             val markertag: Marker? = googleMap.addMarker(marker)
+            val counter = index.toString()
+
             markertag?.tag = address as String + "/" +
                     number as String + "/" +
-                    time as String
-
+                    time as String + "/" +
+                    counter as String
             mMap.addMarker(marker)
 
 
             latlngbounds.include(position)
         }
 
+
         val bounds = latlngbounds.build()
         val padding = 0
     }
 
-    private fun GoogleMap.setOnMapClickListener(onMarkerClickListener: OnMarkerClickListener) {
-
-    }
-
     lateinit var fusedLocationClient: FusedLocationProviderClient
-    lateinit var locationCallback: LocationCallback
+
 
     @SuppressLint("MissingPermission")
     fun setUpdateLocationListener() {
-        val locationRequest = LocationRequest.create()
-        locationRequest.run {
+        val locationRequest = LocationRequest.create().run {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 100000
-
+            //interval = 10000
         }
 
+        val locationCallback: LocationCallback
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                locationResult.let {
+                locationResult?.let {
                     for ((i, location) in it.locations.withIndex()) {
                         Log.d("로케이션", "$i ${location.latitude},${location.longitude}}")
                         setLastLocation(location)
                     }
                 }
+                //Log.d("여까지 오냐?","옴")
+                /*let {
+                    for ((i, location) in it.locations.withIndex()) {
+                        Log.d("로케이션", "$i ${location.latitude},${location.longitude}}")
+                        setLastLocation(location)
+                    }
+                }*/
             }
-
         }
 
         fusedLocationClient.requestLocationUpdates(
-            locationRequest,
+            LocationRequest(),
             locationCallback,
             Looper.myLooper()
 
         )
     }
+
 
     fun setLastLocation(location: Location) {
         val myLocation = LatLng(location.latitude, location.longitude)
@@ -212,8 +246,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .build()
         val camera = CameraUpdateFactory.newCameraPosition(cameraOption)
 
-        //mMap.clear()
-        val descriptor = getDescriptorFromDrawable(R.drawable.my_location)
+        val descriptor = getDescriptorFromDrawable(R.drawable.person)
         val loc_marker = MarkerOptions()
             .position(myLocation)
             .title("현위치")
@@ -262,8 +295,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
-
+    fun softkeyboardHide() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+    }
 }
+
+
+
+
+
+
 
 
 
