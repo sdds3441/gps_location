@@ -59,5 +59,6 @@ dependencies {
 
     implementation 'com.github.mancj:MaterialSearchBar:0.7.1'
 
+    implementation 'com.sothree.slidinguppanel:library:3.4.0' //슬라이딩 업 페널
 }
 

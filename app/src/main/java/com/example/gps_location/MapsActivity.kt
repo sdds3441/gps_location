@@ -1,6 +1,8 @@
 package com.example.gps_location
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -27,10 +29,13 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.example.gps_location.databinding.ActivityMapsBinding
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener
 import com.google.android.gms.maps.model.*
 
 
 import org.json.JSONArray
+import java.lang.Math.abs
+import java.util.*
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -45,6 +50,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
 
+    private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,17 +93,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap = googleMap
         var imm:InputMethodManager?=null
         imm=getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-
         val card_view = binding.cardView
         card_view.visibility = View.GONE
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        showLibraries(googleMap)
+
         //setUpdateLocationListener()
+
+        showLibraries(googleMap)
 
         googleMap!!.setOnMapClickListener(object : GoogleMap.OnMapClickListener {
             override fun onMapClick(p0: LatLng) {
                 card_view.visibility = View.GONE
-
                 softkeyboardHide()
 
             }
@@ -134,8 +140,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val loc_btn=findViewById<ImageButton>(R.id.my_loc)
 
         val bar=findViewById<ImageView>(R.id.search_bar)
-
-
         bar.setOnClickListener{
             val intent = Intent(this, SearchActivity::class.java)
             startActivity(intent)
@@ -143,10 +147,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         loc_btn.setOnClickListener{
             setUpdateLocationListener()
+
         }
 
         val S_Lng=intent.getDoubleExtra("Searched_Lng", 0.0)
         val S_Lat=intent.getDoubleExtra("Searched_Lat", 0.0)
+
+
 
         if (S_Lng!=0.0) {
 
@@ -157,6 +164,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .build()
             val camera = CameraUpdateFactory.newCameraPosition(cameraOption)
             mMap.moveCamera(camera)
+        }
+        else{
+           setUpdateLocationListener()
+
         }
 
     }
@@ -204,39 +215,43 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     fun setUpdateLocationListener() {
-        val locationRequest = LocationRequest.create().run {
+        val locationRequest = LocationRequest.create()
+        locationRequest.run {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            //interval = 10000
+            interval=1000
         }
+
+
 
         val locationCallback: LocationCallback
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult?.let {
-                    for ((i, location) in it.locations.withIndex()) {
+                        for ((i, location) in it.locations.withIndex()) {
                         Log.d("로케이션", "$i ${location.latitude},${location.longitude}}")
-                        setLastLocation(location)
+                            setLastLocation(location)
                     }
+
                 }
-                //Log.d("여까지 오냐?","옴")
-                /*let {
-                    for ((i, location) in it.locations.withIndex()) {
-                        Log.d("로케이션", "$i ${location.latitude},${location.longitude}}")
-                        setLastLocation(location)
-                    }
-                }*/
+
             }
+
         }
 
         fusedLocationClient.requestLocationUpdates(
-            LocationRequest(),
+            locationRequest,
             locationCallback,
             Looper.myLooper()
 
         )
+
+        mMap!!.setOnMapClickListener {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+            val card_view = binding.cardView
+            card_view.visibility = View.GONE
+        }
+
     }
-
-
     fun setLastLocation(location: Location) {
         val myLocation = LatLng(location.latitude, location.longitude)
 
@@ -251,11 +266,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .position(myLocation)
             .title("현위치")
             .icon(descriptor)
+
+        mMap.clear()
         mMap.addMarker(loc_marker)
-        val dis_marker: Marker
+        showLibraries(mMap)
         mMap.moveCamera(camera)
+        nearby()
 
     }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -289,6 +308,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             bitmapDrawable = resources.getDrawable(drawableId) as BitmapDrawable
         }
 
+
         val scaledBitmap = Bitmap.createScaledBitmap(bitmapDrawable.bitmap, 100, 100, false)
 
         return BitmapDescriptorFactory.fromBitmap(scaledBitmap)
@@ -298,6 +318,60 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     fun softkeyboardHide() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+    }
+
+    fun nearby() {
+
+        val jsonString = assets.open("clinic.json").reader().readText()
+        val jsonArray = JSONArray(jsonString)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                Log.d("여기냐?",location.toString())
+                for (index in 0..7) {
+
+                    val jsonObject = jsonArray.getJSONObject(index)
+                    val title = jsonObject.getString("Name")
+                    val Latitude = jsonObject.getDouble("Latitude")
+                    val Longitude = jsonObject.getDouble("Longitude")
+
+                    val Lat_dif= location?.latitude?.minus(Latitude)
+                    val Lng_dif= location?.longitude?.minus(Longitude)
+                    if (Lat_dif?.let { abs(it) }!! <0.0091&& Lng_dif?.let { abs(it) }!! <0.0113)
+                    {
+                        Log.d("1키로보다 작대",title)
+                    }
+
+                }
+            /*Log.d("계산하는겨?",my_loc_lat[0].toString())*/
+
+           /* val Lat_dif= my_loc_lat[my_loc_lat.size-1]-Latitude
+            val Lng_dif= my_loc_lng[my_loc_lng.size-1]-Longitude
+
+            Log.d("계산하는겨?",Lat_dif.toString())
+
+            if (abs(Lat_dif)<0.0091&& abs(Lng_dif) <0.0113)
+            {
+                Log.d("1키로보다 작대",title)
+            }
+*/
+        }
     }
 }
 
