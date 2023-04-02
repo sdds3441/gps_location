@@ -97,6 +97,10 @@ class SearchActivity : AppCompatActivity() {
             Log.d("됬나?",Lat[position].toString())
             startActivity(intent)
 
+            val bundle=Bundle()
+            bundle.putDouble("Searched_Lat",Lat[position].toDouble())
+            bundle.putDouble("Searched_Lng",Lng[position].toDouble())
+
 
         /*Toast.makeText(
                 this@SearchActivity,

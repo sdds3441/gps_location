@@ -131,10 +131,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 card_view.visibility = View.VISIBLE
                 mf.panelHeight=0
 
-                var centeradd = findViewById<TextView>(R.id.park_add_lot)
-                var centername = findViewById<TextView>(R.id.park_name)
-                var centerphone = findViewById<TextView>(R.id.phone_num)
-                var centeropen = findViewById<TextView>(R.id.open_time)
+
+                var centeradd=binding.parkAddLot
+                var centername=binding.parkName
+                var centerphone=binding.phoneNum
+                var centeropen=binding.openTime
+
                 centername.text = marker.title
                 centeradd.text = arr[0]
                 centerphone.text = arr[1]
@@ -160,7 +162,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             setUpdateLocationListener()
 
         }
-
         val S_Lng=intent.getDoubleExtra("Searched_Lng", 0.0)
         val S_Lat=intent.getDoubleExtra("Searched_Lat", 0.0)
 
@@ -345,13 +346,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return
         }
         fusedLocationClient.lastLocation
