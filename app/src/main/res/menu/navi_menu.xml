@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/homeFragment"
         android:title="홈"
-        android:icon="@drawable/baseline_home_24"/>
+        android:icon="@drawable/ic_home"/>
 
+    <item
+        android:id="@+id/chatFragment"
+        android:title="채팅"
+        android:icon="@drawable/ic_chat"/>
+
+    <item
+    android:id="@+id/groupsFragment"
+    android:title="게시판"
+    android:icon="@drawable/ic_groups"/>
     <item
         android:id="@+id/mapsFragment"
         android:title="지도"
-        android:icon="@drawable/baseline_map_24"/>
+        android:icon="@drawable/ic_location"/>
 
     <item
         android:id="@+id/settingFragment"
         android:title="설정"
-        android:icon="@drawable/baseline_settings_24"/>
+        android:icon="@drawable/ic_setting"/>
+
 </menu>

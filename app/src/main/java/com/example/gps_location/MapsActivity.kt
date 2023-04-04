@@ -153,6 +153,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val loc_btn=findViewById<ImageButton>(R.id.my_loc)
 
         val bar=findViewById<ImageView>(R.id.search_bar)
+        bar.bringToFront()
         bar.setOnClickListener{
             val intent = Intent(this, SearchActivity::class.java)
             startActivity(intent)
@@ -371,11 +372,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     fun Sc_adapter() {
         var UserList = arrayListOf<place>(
-            place("용산 아트홀","02-2199-7260","서울 용산구 녹사평대로 150 용산구종합행정타운","dragon_art_hall"),
-            place("필로웨일 정신분석 심리상담센터","02-790-4260","서울 용산구 녹사평대로32길 10 해피하우스 302호","phlo"),
-            place("마인드카페 정신건강의학과 의원","010-7445-9811","서울 용산구 장문로 23 몬드리안 서울 이태원 지하1층(아크앤 북 서점 내)","mind_cafe"),
-            place("엔엑스 피트니스","02-792-4375","서울 용산구 녹사평대로 132 명보2빌딩 3층, 4층","nx_fit"),
-            place("용산구 보건소","02-2199-8012","서울 용산구 녹사평대로 150 용산구종합행정타운","yongsan"),
+            place("용산 아트홀","02-2199-7260","서울 용산구 녹사평대로 150 용산구종합행정타운","dragon_art_hall", "https://www.yongsan.go.kr/health/main/main.do"),
+            place("필로웨일 정신분석 심리상담센터","02-790-4260","서울 용산구 녹사평대로32길 10 해피하우스 302호","phlo","https://www.philowhale.com"),
+            place("마인드카페 정신건강의학과 의원","010-7445-9811","서울 용산구 장문로 23 몬드리안 서울 이태원 지하1층(아크앤 북 서점 내)","mind_cafe","https://clinic.mindcafe.co.kr/"),
+            place("엔엑스 피트니스","02-792-4375","서울 용산구 녹사평대로 132 명보2빌딩 3층, 4층","nx_fit","http://www.nxfitness.co.kr/"),
+            place("용산구 보건소","02-2199-8012","서울 용산구 녹사평대로 150 용산구종합행정타운","yongsan","https://www.yongsan.go.kr/health/main/main.do"),
 
             )
         val Adapter = Data(this, UserList)

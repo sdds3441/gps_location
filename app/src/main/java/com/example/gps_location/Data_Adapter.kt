@@ -19,6 +19,7 @@ class Data (val context: Context, val UserList: ArrayList<place>) : BaseAdapter(
         val Call = view.findViewById<TextView>(R.id.call)
         val Add = view.findViewById<TextView>(R.id.add)
         val Img=view.findViewById<ImageView>(R.id.imageIcon)
+        val Site=view.findViewById<TextView>(R.id.site)
 
         val user = UserList[position]
 
@@ -26,6 +27,7 @@ class Data (val context: Context, val UserList: ArrayList<place>) : BaseAdapter(
         Call.text = user.call
         Add.text = user.add
         val resourceId=context.resources.getIdentifier(user.img,"drawable",context.packageName)
+        Site.text=user.site
         Img.setImageResource(resourceId)
 
 

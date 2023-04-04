@@ -71,6 +71,8 @@
                     android:layout_marginTop="10dp"
                     android:text="가나다"
                     android:textStyle="bold"
+                    android:fontFamily="@font/nanumgothicextrabold"
+                    android:textColor="@color/black"
                     android:textSize="17sp" />
 
                 <TextView
@@ -79,21 +81,11 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/name"
                     android:layout_marginTop="10dp"
+                    android:fontFamily="@font/nanumgothicextrabold"
+                    android:textColor="@color/black"
                     android:text="마바사"
                     android:textSize="12sp" />
 
-                <!--                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginStart="15dp"
-                                    android:layout_below="@+id/imageIcon">
-                                    <TextView
-                                        android:id="@+id/add"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="가나다라"
-                                        android:textSize="15sp"/>
-                                </LinearLayout>-->
                 <TextView
                     android:id="@+id/add"
                     android:layout_width="wrap_content"
@@ -101,6 +93,21 @@
                     android:text="가나다라"
                     android:layout_below="@+id/call"
                     android:layout_marginTop="10dp"
+                    android:fontFamily="@font/nanumgothicextrabold"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    />
+                <TextView
+                    android:id="@+id/site"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="가나다라"
+                    android:layout_below="@+id/add"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/nanumgothicextrabold"
+                    android:textColor="@color/black"
+
+                    android:autoLink="web"
                     android:textSize="12sp"/>
             </RelativeLayout>
 
