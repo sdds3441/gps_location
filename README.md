@@ -1,4 +1,4 @@
-##Nearby Registered Locations using GPS
+## Nearby Registered Locations using GPS
 This project displays nearby registered locations using GPS.
 
 Challenges
